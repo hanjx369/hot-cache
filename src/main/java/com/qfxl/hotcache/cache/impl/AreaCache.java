@@ -2,7 +2,7 @@ package com.qfxl.hotcache.cache.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.qfxl.hotcache.cache.IHotCache;
+import com.qfxl.hotcache.cache.AbstractCache;
 import com.qfxl.hotcache.domain.AreaCity;
 import com.qfxl.hotcache.domain.AreaCounty;
 import com.qfxl.hotcache.domain.AreaProvince;
@@ -10,11 +10,9 @@ import com.qfxl.hotcache.model.AreaProvinceVO;
 import com.qfxl.hotcache.service.AreaCityService;
 import com.qfxl.hotcache.service.AreaCountyService;
 import com.qfxl.hotcache.service.AreaProvinceService;
-import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,20 +26,14 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class AreaCache implements IHotCache<String, AreaProvinceVO> {
+public class AreaCache extends AbstractCache<String, AreaProvinceVO> {
 
-    private final AreaProvinceService areaProvinceService;
-
-    private final AreaCityService areaCityService;
-
-    private final AreaCountyService areaCountyService;
-
-    // redis模板
-    private final RedisTemplate<String, Object> redisTemplate;
-
-    // 线程池
-    private final static ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
+    @Resource
+    private AreaProvinceService areaProvinceService;
+    @Resource
+    private AreaCityService areaCityService;
+    @Resource
+    private AreaCountyService areaCountyService;
 
     // 缓存KEY
     private final static String AREA_CACHE_KEY = "area:cache:key";
@@ -111,26 +103,6 @@ public class AreaCache implements IHotCache<String, AreaProvinceVO> {
     @Override
     public void clear() {
         redisTemplate.delete(redisTemplate.keys(AREA_CACHE_KEY + "*"));
-    }
-
-    @Override
-    public void reload() {
-        clear();
-        init();
-    }
-
-    @PreDestroy
-    private void shutdownThreadPool() {
-        try {
-            EXECUTOR_SERVICE.shutdown();
-            if (EXECUTOR_SERVICE.awaitTermination(15, TimeUnit.MINUTES)) {
-                log.info("{} 线程池自动销毁", this.getClass().getName());
-                EXECUTOR_SERVICE.shutdownNow();
-            }
-        } catch (Exception e) {
-            log.error("{} 线程池自动销毁失败", this.getClass().getName());
-            EXECUTOR_SERVICE.shutdownNow();
-        }
     }
 
 }

@@ -2,14 +2,13 @@ package com.qfxl.hotcache.cache.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.qfxl.hotcache.cache.IHotCache;
+import com.qfxl.hotcache.cache.AbstractCache;
 import com.qfxl.hotcache.domain.SysDictData;
 import com.qfxl.hotcache.domain.SysDictType;
 import com.qfxl.hotcache.model.DictVO;
 import com.qfxl.hotcache.service.SysDictDataService;
 import com.qfxl.hotcache.service.SysDictTypeService;
-import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,8 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,19 +26,16 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class DictCache implements IHotCache<String, DictVO> {
+public class DictCache extends AbstractCache<String, DictVO> {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-
-    private final SysDictTypeService dictTypeService;
-
-    private final SysDictDataService dictDataService;
-
-    private final static ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private SysDictTypeService dictTypeService;
+    @Resource
+    private SysDictDataService dictDataService;
 
     private final static String DICT_CACHE_KEY = "dict:cache:key";
-    private final SysDictDataService sysDictDataService;
 
     @SneakyThrows
     @Override
@@ -68,7 +62,7 @@ public class DictCache implements IHotCache<String, DictVO> {
     }
 
     private DictVO buildDictTree(SysDictType dictType) {
-        List<DictVO.DictDataVO> dictDataList = sysDictDataService.lambdaQuery()
+        List<DictVO.DictDataVO> dictDataList = dictDataService.lambdaQuery()
                 .eq(SysDictData::getDictType, dictType.getDictType())
                 .list().stream().map(dictData -> DictVO.DictDataVO.builder()
                         .dictValue(dictData.getDictValue())
@@ -94,26 +88,6 @@ public class DictCache implements IHotCache<String, DictVO> {
     @Override
     public void clear() {
         redisTemplate.delete(redisTemplate.keys(DICT_CACHE_KEY + "*"));
-    }
-
-    @Override
-    public void reload() {
-        clear();
-        init();
-    }
-
-    @PreDestroy
-    private void shutdownThreadPool() {
-        try {
-            EXECUTOR_SERVICE.shutdown();
-            if (EXECUTOR_SERVICE.awaitTermination(15, TimeUnit.MINUTES)) {
-                log.info("{} 线程池自动销毁", this.getClass().getName());
-                EXECUTOR_SERVICE.shutdownNow();
-            }
-        } catch (Exception e) {
-            log.error("{} 线程池自动销毁失败", this.getClass().getName());
-            EXECUTOR_SERVICE.shutdownNow();
-        }
     }
 
 }
