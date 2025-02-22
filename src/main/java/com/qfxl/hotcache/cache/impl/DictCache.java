@@ -2,7 +2,6 @@ package com.qfxl.hotcache.cache.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.qfxl.hotcache.cache.IHotCache;
 import com.qfxl.hotcache.domain.SysDictData;
 import com.qfxl.hotcache.domain.SysDictType;
 import com.qfxl.hotcache.model.DictVO;
@@ -29,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class DictCache implements IHotCache<String, DictVO> {
+public class DictCache {
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
@@ -43,7 +42,6 @@ public class DictCache implements IHotCache<String, DictVO> {
     private final static String DICT_CACHE_KEY = "dict:cache:key";
 
     @SneakyThrows
-    @Override
     public void init() {
         long startTime = System.currentTimeMillis();
 
@@ -81,7 +79,7 @@ public class DictCache implements IHotCache<String, DictVO> {
                 .build();
     }
 
-    @Override
+
     public DictVO get(String dictType) {
         if (!redisTemplate.hasKey(DICT_CACHE_KEY + dictType)) {
             return null;
@@ -90,12 +88,12 @@ public class DictCache implements IHotCache<String, DictVO> {
         return JSONObject.parseObject(redisTemplate.opsForValue().get(DICT_CACHE_KEY + dictType).toString(), DictVO.class);
     }
 
-    @Override
+
     public void clear() {
         redisTemplate.delete(redisTemplate.keys(DICT_CACHE_KEY + "*"));
     }
 
-    @Override
+
     public void reload() {
         clear();
         init();

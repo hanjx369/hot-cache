@@ -1,10 +1,10 @@
 package com.qfxl.hotcache.cache;
 
+import com.qfxl.hotcache.cache.impl.AreaCache;
+import com.qfxl.hotcache.cache.impl.DictCache;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * 缓存启动
@@ -16,10 +16,13 @@ import java.util.List;
 public class CacheRunner implements InitializingBean {
 
     @Resource
-    private List<IHotCache<?, ?>> hotCacheList;
+    private AreaCache areaCache;
+    @Resource
+    private DictCache dictCache;
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        hotCacheList.forEach(IHotCache::init);
+        areaCache.init();
+        dictCache.init();
     }
 }

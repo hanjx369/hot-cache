@@ -2,7 +2,6 @@ package com.qfxl.hotcache.cache.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.qfxl.hotcache.cache.IHotCache;
 import com.qfxl.hotcache.domain.AreaCity;
 import com.qfxl.hotcache.domain.AreaCounty;
 import com.qfxl.hotcache.domain.AreaProvince;
@@ -28,7 +27,7 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @Component
-public class AreaCache implements IHotCache<String, AreaProvinceVO> {
+public class AreaCache {
 
     @Resource
     private AreaProvinceService areaProvinceService;
@@ -47,7 +46,6 @@ public class AreaCache implements IHotCache<String, AreaProvinceVO> {
     private final static String AREA_CACHE_KEY = "area:cache:key";
 
     @SneakyThrows
-    @Override
     public void init() {
         long startTime = System.currentTimeMillis();
 
@@ -99,7 +97,7 @@ public class AreaCache implements IHotCache<String, AreaProvinceVO> {
                 .build();
     }
 
-    @Override
+
     public AreaProvinceVO get(String provinceId) {
         if (!redisTemplate.hasKey(AREA_CACHE_KEY + provinceId)) {
             return null;
@@ -108,12 +106,12 @@ public class AreaCache implements IHotCache<String, AreaProvinceVO> {
         return JSONObject.parseObject(redisTemplate.opsForValue().get(AREA_CACHE_KEY + provinceId).toString(), AreaProvinceVO.class);
     }
 
-    @Override
+
     public void clear() {
         redisTemplate.delete(redisTemplate.keys(AREA_CACHE_KEY + "*"));
     }
 
-    @Override
+
     public void reload() {
         clear();
         init();
