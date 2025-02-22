@@ -1,6 +1,6 @@
 package com.qfxl.hotcache.cache;
 
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +13,10 @@ import java.util.List;
  * @Date 2025-02-23 01:35
  */
 @Component
-@RequiredArgsConstructor
 public class CacheRunner implements InitializingBean {
 
-    private final List<IHotCache<?, ?>> hotCacheList;
+    @Resource
+    private List<IHotCache<?, ?>> hotCacheList;
 
     @Override
     public void afterPropertiesSet() throws Exception {
