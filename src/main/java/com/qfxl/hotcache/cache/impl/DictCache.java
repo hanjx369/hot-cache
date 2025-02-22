@@ -9,7 +9,7 @@ import com.qfxl.hotcache.model.DictVO;
 import com.qfxl.hotcache.service.SysDictDataService;
 import com.qfxl.hotcache.service.SysDictTypeService;
 import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -29,19 +29,18 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class DictCache implements IHotCache<String, DictVO> {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-
-    private final SysDictTypeService dictTypeService;
-
-    private final SysDictDataService dictDataService;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private SysDictTypeService dictTypeService;
+    @Resource
+    private SysDictDataService dictDataService;
 
     private final static ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
 
     private final static String DICT_CACHE_KEY = "dict:cache:key";
-    private final SysDictDataService sysDictDataService;
 
     @SneakyThrows
     @Override
@@ -68,7 +67,7 @@ public class DictCache implements IHotCache<String, DictVO> {
     }
 
     private DictVO buildDictTree(SysDictType dictType) {
-        List<DictVO.DictDataVO> dictDataList = sysDictDataService.lambdaQuery()
+        List<DictVO.DictDataVO> dictDataList = dictDataService.lambdaQuery()
                 .eq(SysDictData::getDictType, dictType.getDictType())
                 .list().stream().map(dictData -> DictVO.DictDataVO.builder()
                         .dictValue(dictData.getDictValue())

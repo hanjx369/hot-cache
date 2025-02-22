@@ -11,7 +11,7 @@ import com.qfxl.hotcache.service.AreaCityService;
 import com.qfxl.hotcache.service.AreaCountyService;
 import com.qfxl.hotcache.service.AreaProvinceService;
 import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,17 +28,17 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AreaCache implements IHotCache<String, AreaProvinceVO> {
 
-    private final AreaProvinceService areaProvinceService;
-
-    private final AreaCityService areaCityService;
-
-    private final AreaCountyService areaCountyService;
-
+    @Resource
+    private AreaProvinceService areaProvinceService;
+    @Resource
+    private AreaCityService areaCityService;
+    @Resource
+    private AreaCountyService areaCountyService;
     // redis模板
-    private final RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     // 线程池
     private final static ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
