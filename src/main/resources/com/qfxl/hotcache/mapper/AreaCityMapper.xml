@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qfxl.hotcache.mapper.AreaCityMapper">
+
+    <resultMap id="BaseResultMap" type="com.qfxl.hotcache.domain.AreaCity">
+            <id property="id" column="id" />
+            <result property="name" column="name" />
+            <result property="cityId" column="city_id" />
+            <result property="provinceId" column="province_id" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,city_id,province_id
+    </sql>
+</mapper>
